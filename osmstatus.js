@@ -1,5 +1,7 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const net = require('net');
+const fs = require('fs');
+const path = require('path');
 
 const TOKEN = 'MTI3MjkzNTkzNjk5MjIxNTA0MA.GV4kW6.AsimgsKws6TLVtD1xl1Ua5WVFOlU09ojBJfFOo'; // oh noes please dont steal my token!!!!
 const GUILD_ID = '549321864443592724'; // OSM Guild ID 
@@ -11,18 +13,20 @@ const ADMIN_ROLE_ID = '618177168786325516'; // staff role ID
 const MINECRAFT_SERVER_IP = 'os-mc.net';
 const MINECRAFT_SERVER_PORT = 25565;
 
+const UPTIME_FILE = path.join(__dirname, 'uptime.json');
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
 let serverStatus = 'online';
 let downtimeStart = null;
-let uptimeStart = Date.now();
+let uptimeStart = loadUptime(); // Load the last uptime from the JSON file
 let statusMessageId = null;
 let missedPings = 0;
-let announcementMessageId = null; 
+let announcementMessageId = null; // Track the ID of the announcement message
 const MAX_MISSED_PINGS = 100;
-const LOGS = []; 
+const LOGS = []; // To keep track of logs
 
 const THUMBNAIL_URL = 'https://yt3.googleusercontent.com/ytc/AIdro_kYI3c-DdaW7GR6ahh748ikn0YRZnILdeOZqZrV_oOr0A=s900-c-k-c0x00ffffff-no-rj';
 
@@ -48,8 +52,8 @@ client.on('messageCreate', async (message) => {
 
   if (command === '!status') {
     log(`[COMMAND] ${message.author.tag} requested server status.`);
-    await checkMinecraftServerStatus();
-    message.reply('Server status checked.');
+    const statusEmbed = createStatusEmbed();  // Create the status embed
+    await message.channel.send({ embeds: [statusEmbed] });  // Send the embed to the channel where the command was run
   }
 
   if (command === '!reset') {
@@ -58,6 +62,7 @@ client.on('messageCreate', async (message) => {
       uptimeStart = Date.now();
       downtimeStart = null;
       missedPings = 0;
+      saveUptime(uptimeStart); // Save the new uptime start time
       message.reply('Uptime and downtime counters have been reset.');
     } else {
       message.reply('You do not have permission to use this command.');
@@ -140,6 +145,7 @@ function checkMinecraftServerStatus() {
     if (serverStatus === 'offline' && missedPings >= MAX_MISSED_PINGS) {
       // The server just came back online
       uptimeStart = Date.now();
+      saveUptime(uptimeStart); // Save the new uptime start time
       serverStatus = 'online';
       updateVoiceChannelName('[🟢] MC Server: Online');
       sendServerBackOnlineAlert();
@@ -234,6 +240,30 @@ async function updateVoiceChannelName(newName) {
     }
   } catch (error) {
     log(`[LOG] Error updating voice channel name: ${error.message}`);
+  }
+}
+
+function loadUptime() {
+  try {
+    if (fs.existsSync(UPTIME_FILE)) {
+      const data = fs.readFileSync(UPTIME_FILE);
+      const json = JSON.parse(data);
+      log('[LOG] Uptime data loaded successfully.');
+      return json.uptimeStart || Date.now();
+    }
+  } catch (error) {
+    log(`[LOG] Failed to load uptime data: ${error.message}`);
+  }
+  return Date.now(); // Default to now if there's no data or an error occurs
+}
+
+function saveUptime(uptimeStart) {
+  try {
+    const data = JSON.stringify({ uptimeStart });
+    fs.writeFileSync(UPTIME_FILE, data);
+    log('[LOG] Uptime data saved successfully.');
+  } catch (error) {
+    log(`[LOG] Failed to save uptime data: ${error.message}`);
   }
 }
 
