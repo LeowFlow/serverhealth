@@ -3,7 +3,7 @@ const net = require('net');
 
 const TOKEN = 'MTI3MjkzNTkzNjk5MjIxNTA0MA.GV4kW6.AsimgsKws6TLVtD1xl1Ua5WVFOlU09ojBJfFOo'; // oh noes please dont steal my token!!!!
 const GUILD_ID = '549321864443592724'; //OSM Guild ID 
-const VOICE_CHANNEL_ID = '1243859450054574120'; 
+const VOICE_CHANNEL_ID = '1273232886543290391'; 
 const ANNOUNCEMENT_CHANNEL_ID = '638836089607684141'; //#general channel 
 const STATUS_CHANNEL_ID = '867478353094639646'; //#server-info channel
 
