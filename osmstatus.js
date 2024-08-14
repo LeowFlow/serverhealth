@@ -124,7 +124,7 @@ async function sendServerOfflineAlert() {
   const embed = new EmbedBuilder()
     .setColor('Red')
     .setTitle('⚠️ Minecraft Server Offline')
-    .setDescription(`The server went offline at ${new Date(downtimeStart).toLocaleTimeString()}. We will keep you updated.`)
+    .setDescription(`The server went offline at ${new Date(downtimeStart).toLocaleTimeString()}`)
     .setThumbnail(THUMBNAIL_URL);
 
   const message = await channel.send({ embeds: [embed] });
@@ -155,11 +155,25 @@ async function sendServerBackOnlineAlert() {
 }
 
 async function updateVoiceChannelName(newName) {
-  const channel = await client.channels.fetch(VOICE_CHANNEL_ID);
-  if (channel && channel.name !== newName) {
-    await channel.setName(newName);
-    console.log(`[LOG] Voice channel name updated to: ${newName}`);
+  try {
+    console.log(`[LOG] Attempting to fetch voice channel with ID: ${VOICE_CHANNEL_ID}`);
+    const channel = await client.channels.fetch(VOICE_CHANNEL_ID);
+    if (channel) {
+      console.log(`[LOG] Found voice channel: ${channel.name} (${channel.id})`);
+      if (channel.name !== newName) {
+        await channel.setName(newName);
+        console.log(`[LOG] Voice channel name updated to: ${newName}`);
+      } else {
+        console.log(`[LOG] Voice channel name is already up to date: ${newName}`);
+      }
+    } else {
+      console.error(`[LOG] Voice channel with ID ${VOICE_CHANNEL_ID} not found.`);
+    }
+  } catch (error) {
+    console.error(`[LOG] Error updating voice channel name: ${error.message}`);
   }
 }
+
+
 
 client.login(TOKEN).catch(err => console.error(`[LOG] Failed to log in: ${err.message}`));
