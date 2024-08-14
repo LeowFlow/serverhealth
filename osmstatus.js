@@ -15,6 +15,8 @@ const MINECRAFT_SERVER_PORT = 25565;
 
 const UPTIME_FILE = path.join(__dirname, 'uptime.json');
 
+const LOGS = []; // Initialize the logs array
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
@@ -26,7 +28,6 @@ let statusMessageId = null;
 let missedPings = 0;
 let announcementMessageId = null; // Track the ID of the announcement message
 const MAX_MISSED_PINGS = 100;
-const LOGS = []; // To keep track of logs
 
 const THUMBNAIL_URL = 'https://yt3.googleusercontent.com/ytc/AIdro_kYI3c-DdaW7GR6ahh748ikn0YRZnILdeOZqZrV_oOr0A=s900-c-k-c0x00ffffff-no-rj';
 
@@ -246,7 +247,7 @@ async function updateVoiceChannelName(newName) {
 function loadUptime() {
   try {
     if (fs.existsSync(UPTIME_FILE)) {
-      const data = fs.readFileSync(UPTIME_FILE);
+      const data = fs.readFileSync(UPTIME_FILE, 'utf8');
       const json = JSON.parse(data);
       log('[LOG] Uptime data loaded successfully.');
       return json.uptimeStart || Date.now();
@@ -257,8 +258,8 @@ function loadUptime() {
     }
   } catch (error) {
     log(`[LOG] Failed to load uptime data: ${error.message}`);
+    return Date.now(); // Return the current time if there's an error
   }
-  return Date.now(); // Default to now if there's no data or an error occurs
 }
 
 function saveUptime(uptimeStart) {
