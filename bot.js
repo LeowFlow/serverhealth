@@ -69,7 +69,7 @@ async function initializeStatusMessage() {
 
 async function updateStatusMessage() {
   if (statusMessageId) {
-    const channel = await client.channels.fetch(config.statusChannelId);
+    const channel = await client.channels.fetch(STATUS_CHANNEL_ID);
     const statusMessage = await channel.messages.fetch(statusMessageId);
     await statusMessage.edit({ embeds: [createStatusEmbed(serverStatus, uptimeStart, downtimeStart)] });
     log(`[LOG] Updated status message with ID: ${statusMessageId}`);

@@ -2,9 +2,9 @@ const { EmbedBuilder } = require('discord.js');
 const config = require('../config.json');
 const { formatTime } = require('./timeFormatter.js');
 
-function createStatusEmbed() {
-  const greenOrb = '<:greenOrb:123456789012345678>';
-  const redOrb = '<:redOrb:876543210987654321>';
+function createStatusEmbed(serverStatus, uptimeStart, downtimeStart) {
+  const greenOrb = '<:greenOrb:1222915426414231644>';
+  const redOrb = '<:redOrb:1222915427760341114>';
 
   const description = serverStatus === 'online' 
     ? `${greenOrb} ︱**Server Status**: Online\n⏰ ︱**Uptime**: ${formatTime(Date.now() - uptimeStart)}`
