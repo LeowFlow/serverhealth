@@ -5,6 +5,7 @@ const path = require('path');
 const config = require('./config.json');
 const { log, LOGS } = require('./utils/logger');
 const { loadUptime, saveUptime } = require('./utils/uptimeManager');
+const { updateVoiceChannelName } = require('./utils/channelManager');
 const { createStatusEmbed } = require('./utils/statusEmbed');
 
 const client = new Client({
