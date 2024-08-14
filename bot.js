@@ -85,13 +85,14 @@ function checkMinecraftServerStatus() {
       uptimeStart = Date.now();
       saveUptime(uptimeStart);
       serverStatus = 'online';
-      updateVoiceChannelName('[🟢] MC Server: Online');
+      updateVoiceChannelName(client, '[🟢] MC Server: Online'); // Pass the client object here
       sendServerBackOnlineAlert();
     } else if (serverStatus === 'online') {
-      updateVoiceChannelName('[🟢] MC Server: Online');
+      updateVoiceChannelName(client, '[🟢] MC Server: Online'); // Pass the client object here
     }
-
+  
     missedPings = 0;
+    updateStatusMessage();
     socket.destroy();
   });
 
