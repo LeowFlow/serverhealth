@@ -250,6 +250,10 @@ function loadUptime() {
       const json = JSON.parse(data);
       log('[LOG] Uptime data loaded successfully.');
       return json.uptimeStart || Date.now();
+    } else {
+      log('[LOG] Uptime file does not exist, creating a new one.');
+      saveUptime(Date.now()); // Create the file with the current uptime
+      return Date.now();
     }
   } catch (error) {
     log(`[LOG] Failed to load uptime data: ${error.message}`);
@@ -270,7 +274,7 @@ function saveUptime(uptimeStart) {
 function log(message) {
   console.log(message);
   LOGS.push(message);
-  if (LOGS.length > 100) LOGS.shift(); // Keeps only the last 100 logs
+  if (LOGS.length > 100) LOGS.shift(); // Keep only the last 100 logs
 }
 
 client.login(TOKEN).catch(err => log(`[LOG] Failed to log in: ${err.message}`));
