@@ -90,11 +90,16 @@ function checkMinecraftServerStatus() {
 
   socket.connect(MINECRAFT_SERVER_PORT, MINECRAFT_SERVER_IP, () => {
     if (serverStatus === 'offline' && missedPings >= MAX_MISSED_PINGS) {
+      // The server just came back online
       uptimeStart = Date.now();
+      serverStatus = 'online';
       updateVoiceChannelName('🟢 MC Server: Online');
       sendServerBackOnlineAlert();
+    } else if (serverStatus === 'online') {
+      // The server is still online
+      updateVoiceChannelName('🟢 MC Server: Online');
     }
-    serverStatus = 'online';
+
     missedPings = 0;
     updateStatusMessage();
     socket.destroy();
@@ -110,11 +115,16 @@ function handleMissedPing() {
 
   if (missedPings >= MAX_MISSED_PINGS) {
     if (serverStatus === 'online') {
+      // The server just went offline
       downtimeStart = Date.now();
+      serverStatus = 'offline';
       updateVoiceChannelName('🔴 MC Server: Offline');
       sendServerOfflineAlert();
+    } else if (serverStatus === 'offline') {
+      // The server is still offline
+      updateVoiceChannelName('🔴 MC Server: Offline');
     }
-    serverStatus = 'offline';
+
     updateStatusMessage();
   }
 }
@@ -160,6 +170,14 @@ async function updateVoiceChannelName(newName) {
     const channel = await client.channels.fetch(VOICE_CHANNEL_ID);
     if (channel) {
       console.log(`[LOG] Found voice channel: ${channel.name} (${channel.id})`);
+
+      // Check if the bot has the necessary permissions
+      const permissions = channel.permissionsFor(client.user);
+      if (!permissions || !permissions.has('MANAGE_CHANNELS')) {
+        console.error(`[LOG] Bot does not have permission to manage the channel: ${channel.name}`);
+        return;
+      }
+
       if (channel.name !== newName) {
         await channel.setName(newName);
         console.log(`[LOG] Voice channel name updated to: ${newName}`);
@@ -173,6 +191,7 @@ async function updateVoiceChannelName(newName) {
     console.error(`[LOG] Error updating voice channel name: ${error.message}`);
   }
 }
+
 
 
 
