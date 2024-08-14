@@ -20,7 +20,7 @@ let uptimeStart = Date.now();
 let statusMessageId = null;
 let missedPings = 0;
 let announcementMessageId = null; // Track the ID of the announcement message
-const MAX_MISSED_PINGS = 3;
+const MAX_MISSED_PINGS = 100;
 
 const THUMBNAIL_URL = 'https://yt3.googleusercontent.com/ytc/AIdro_kYI3c-DdaW7GR6ahh748ikn0YRZnILdeOZqZrV_oOr0A=s900-c-k-c0x00ffffff-no-rj';
 
