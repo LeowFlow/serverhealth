@@ -93,11 +93,11 @@ function checkMinecraftServerStatus() {
       // The server just came back online
       uptimeStart = Date.now();
       serverStatus = 'online';
-      updateVoiceChannelName('🟢 MC Server: Online');
+      updateVoiceChannelName('[🟢] MC Server: Online');
       sendServerBackOnlineAlert();
     } else if (serverStatus === 'online') {
       // The server is still online
-      updateVoiceChannelName('🟢 MC Server: Online');
+      updateVoiceChannelName('[🟢] MC Server: Online');
     }
 
     missedPings = 0;
@@ -118,11 +118,11 @@ function handleMissedPing() {
       // The server just went offline
       downtimeStart = Date.now();
       serverStatus = 'offline';
-      updateVoiceChannelName('🔴 MC Server: Offline');
+      updateVoiceChannelName('[🔴] MC Server: Offline');
       sendServerOfflineAlert();
     } else if (serverStatus === 'offline') {
       // The server is still offline
-      updateVoiceChannelName('🔴 MC Server: Offline');
+      updateVoiceChannelName('[🔴] MC Server: Offline');
     }
 
     updateStatusMessage();
