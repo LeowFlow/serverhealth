@@ -1,16 +1,10 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-const fs = require('fs');
 const net = require('net');
-const path = require('path');
 const config = require('./config.json');
-const { log, LOGS } = require('./utils/logger');
-const { loadUptime, saveUptime } = require('./utils/uptimeManager');
 const { updateVoiceChannelName } = require('./utils/channelManager');
 const { createStatusEmbed } = require('./utils/statusEmbed');
-
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
-});
+const { loadUptime, saveUptime } = require('./utils/uptimeManager');
+const { log } = require('./utils/logger');
 
 let serverStatus = 'online';
 let downtimeStart = null;
@@ -18,6 +12,10 @@ let uptimeStart = loadUptime();
 let statusMessageId = null;
 let missedPings = 0;
 let announcementMessageId = null;
+
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+});
 
 client.once('ready', async () => {
   log(`[LOG] Logged in as ${client.user.tag}`);
@@ -30,22 +28,6 @@ client.once('ready', async () => {
 
   await initializeStatusMessage();
   setInterval(checkMinecraftServerStatus, 5000);
-  setInterval(updateStatusMessage, 30000);
-});
-
-client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
-
-  const args = message.content.split(' ');
-  const command = args.shift().toLowerCase();
-
-  // Dynamically load commands
-  try {
-    const commandFile = require(`./commands/${command.slice(1)}.js`);
-    await commandFile.execute(message, args, { serverStatus, uptimeStart, downtimeStart, missedPings, announcementMessageId });
-  } catch (error) {
-    log(`[LOG] Command not found: ${command}`);
-  }
 });
 
 async function initializeStatusMessage() {
@@ -69,7 +51,7 @@ async function initializeStatusMessage() {
 
 async function updateStatusMessage() {
   if (statusMessageId) {
-    const channel = await client.channels.fetch(STATUS_CHANNEL_ID);
+    const channel = await client.channels.fetch(config.statusChannelId);
     const statusMessage = await channel.messages.fetch(statusMessageId);
     await statusMessage.edit({ embeds: [createStatusEmbed(serverStatus, uptimeStart, downtimeStart)] });
     log(`[LOG] Updated status message with ID: ${statusMessageId}`);
@@ -85,12 +67,12 @@ function checkMinecraftServerStatus() {
       uptimeStart = Date.now();
       saveUptime(uptimeStart);
       serverStatus = 'online';
-      updateVoiceChannelName(client, '[🟢] MC Server: Online'); // Pass the client object here
+      updateVoiceChannelName(client, '[🟢] MC Server: Online');
       sendServerBackOnlineAlert();
     } else if (serverStatus === 'online') {
-      updateVoiceChannelName(client, '[🟢] MC Server: Online'); // Pass the client object here
+      updateVoiceChannelName(client, '[🟢] MC Server: Online');
     }
-  
+
     missedPings = 0;
     updateStatusMessage();
     socket.destroy();
@@ -108,11 +90,13 @@ function handleMissedPing() {
     if (serverStatus === 'online') {
       downtimeStart = Date.now();
       serverStatus = 'offline';
-      updateVoiceChannelName('[🔴] MC Server: Offline');
+      updateVoiceChannelName(client, '[🔴] MC Server: Offline');
       sendServerOfflineAlert();
     } else if (serverStatus === 'offline') {
-      updateVoiceChannelName('[🔴] MC Server: Offline');
+      updateVoiceChannelName(client, '[🔴] MC Server: Offline');
     }
+
+    updateStatusMessage();
   }
 }
 
