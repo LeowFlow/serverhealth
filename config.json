@@ -1,14 +1,14 @@
 {
-    "token": "MTI3MjkzNTkzNjk5MjIxNTA0MA.GV4kW6.AsimgsKws6TLVtD1xl1Ua5WVFOlU09ojBJfFOo",
+    "token": "MTI3MjkzNTkzNjk5MjIxNTA0MA.G2QECe.bQVjJdoIwA9cQObYgz9c0ZDc3yCJCNfqXToASE",
     "guildId": "549321864443592724",
     "voiceChannelId": "1273232886543290391",
     "announcementChannelId": "638836089607684141",
     "statusChannelId": "867478353094639646",
+    "whitelistChannelId": "1278335788668682344",
     "minecraftServerIp": "os-mc.net",
     "minecraftServerPort": 25565,
     "adminRoleId": "123456789012345678",
-    "thumbnailUrl": "https://yt3.googleusercontent.com/ytc/AIdro_kYI3c-DdaW7GR6ahh748ikn0YRZnILdeOZqZrV_oOr0A=s900-c-k-c0x00ffffff-no-rj",
-    "maxMissedPings": 100,
+    "maxMissedPings": 10,
     "uptimeFile": "uptime.json"
   }
   
