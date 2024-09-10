@@ -11,6 +11,8 @@ let downtimeStart = null;
 let uptimeStart = loadUptime();
 let statusMessageId = null;
 let missedPings = 0;
+let lastChannelName = null;
+
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
@@ -47,7 +49,7 @@ async function initializeStatusMessage() {
     log(`[LOG] Created new status message with ID: ${statusMessageId}`);
   }
 }
-
+//Checks status using Johny's API and updates the status message
 async function checkMinecraftServerStatus() {
   try {
     const response = await axios.get('https://servers.api.legacyminecraft.com/api/v1/getServer?uuid=e391569f-490c-3ca1-92bc-167084a37c44');
@@ -60,7 +62,7 @@ async function checkMinecraftServerStatus() {
       return;
     }
 
-    const serverStatus = 'online';
+    const newServerStatus = 'online';
     const playerCount = data.onlinePlayers;
     const maxPlayers = data.maxPlayers || 'Unknown';
     const serverDescription = data.serverDescription || "No description available.";
@@ -68,26 +70,47 @@ async function checkMinecraftServerStatus() {
     const playersData = Array.isArray(data.players) ? data.players : [];
     const isWhitelistEnabled = data.whitelist;
 
-    await updateStatusMessage(serverStatus, uptimeStart, downtimeStart, playerCount, maxPlayers, serverDescription, serverVersion, playersData, isWhitelistEnabled);
+    await updateStatusMessage(newServerStatus, uptimeStart, downtimeStart, playerCount, maxPlayers, serverDescription, serverVersion, playersData, isWhitelistEnabled);
     await updateWhitelistChannel(isWhitelistEnabled);
 
-    const newChannelName = `[🟢] Server: Online [${playerCount}/${maxPlayers}]`;
-    log(`[LOG] Updating voice channel name to: ${newChannelName}`);
+    const newChannelName = `🟢 Online [${playerCount}/${maxPlayers}]`;
 
-    const voiceChannel = await client.channels.fetch('1273232886543290391', { force: true });
+    if (newChannelName !== lastChannelName) {
+      const voiceChannel = await client.channels.fetch('1273232886543290391', { force: true });
+      if (voiceChannel) {
+        log(`[LOG] Updating voice channel name to: ${newChannelName}`);
+        await voiceChannel.setName(newChannelName);
+        log(`[LOG] Voice channel name updated to: ${newChannelName}`);
+        lastChannelName = newChannelName; // Update the last known channel name
+      } else {
+        log(`[LOG] Voice channel not found.`);
+      }
+    } else {
+      log(`[LOG] Voice channel name is already up to date: ${newChannelName}`);
+    }
 
-    log(`[LOG] Voice channel before update: ${voiceChannel.name}`);
-
-    await voiceChannel.setName(newChannelName);
-
-    const updatedChannel = await client.channels.fetch('1273232886543290391', { force: true });
-    log(`[LOG] Voice channel after update: ${updatedChannel.name}`);
+    serverStatus = newServerStatus;
 
   } catch (error) {
+    if (serverStatus !== 'offline') {
+      serverStatus = 'offline';
+      const newChannelName = `🔴 Offline`;
+      const voiceChannel = await client.channels.fetch('1273232886543290391', { force: true });
+      if (voiceChannel && newChannelName !== lastChannelName) {
+        log(`[LOG] Updating voice channel name to: ${newChannelName}`);
+        await voiceChannel.setName(newChannelName);
+        lastChannelName = newChannelName; // Update the last known channel name
+      } else if (!voiceChannel) {
+        log(`[LOG] Voice channel not found.`);
+      }
+    }
+
     handleMissedPing();
     log(`[LOG] Error fetching server status: ${error.message}`);
   }
 }
+
+
 
 async function updateStatusMessage(serverStatus, uptimeStart, downtimeStart, playerCount, maxPlayers, serverDescription, serverVersion, playersData, isWhitelistEnabled) {
   log(`[DEBUG] updateStatusMessage with parameters: playerCount: ${playerCount}, maxPlayers: ${maxPlayers}, serverDescription: ${serverDescription}, serverVersion: ${serverVersion}, players: ${playersData.map(p => p.username).join(', ')}, whitelistEnabled: ${isWhitelistEnabled}`);
@@ -116,9 +139,9 @@ async function updateWhitelistChannel(isWhitelisted) {
     return log(`[LOG] Whitelist channel with ID ${whitelistChannelId} not found.`);
   }
 
-  const whitelistStatus = isWhitelisted ? "ON" : "OFF";
+  const whitelistStatus = isWhitelisted ? "On" : "Off";
   const emoji = isWhitelisted ? "🔒" : "🔓";
-  const newChannelName = `${emoji} WHITELIST: ${whitelistStatus}`;
+  const newChannelName = `${emoji} Whitelist: ${whitelistStatus}`;
 
   if (channel.name !== newChannelName) {
     await channel.edit({ name: newChannelName });

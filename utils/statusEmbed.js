@@ -4,7 +4,7 @@ function createStatusEmbed(serverStatus, uptimeStart, downtimeStart, playerCount
   const version = serverVersion || "Unknown";
   const maxPlayersValue = maxPlayers || "Unknown";
   const playersList = Array.isArray(playersData) && playersData.length > 0
-    ? playersData.map(player => player.username).join(', ')
+    ? playersData.map(player => `\`${player.username}\``).join(', ')  // Wrap each username in code markdown
     : "No players online";
 
   let titleText = serverStatus === 'online' 
@@ -39,7 +39,6 @@ function createStatusEmbed(serverStatus, uptimeStart, downtimeStart, playerCount
 
   return embed;
 }
-
 
 function formatUptime(uptimeStart) {
   const uptime = Date.now() - uptimeStart;
